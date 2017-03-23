@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<script src='js/jquery.min.js'></script>
+	<script src='js/jquery_form_min.js'></script>
+	<script src='js/hotcss.js'></script>
+	<link rel="stylesheet" href="css/home.css">
+	<link rel="stylesheet" href="css/index.css">
+	<title>上传图片的插件</title>
+</head>
+<body>
+	<div class="hot_imglists clearfix">
+		<div class="numners" id="numners">1/4</div>
+		<div class="imgs1" id="imgs1">
+			<form enctype="multipart/form-data" id="fotms" method="post" action="/index.php/Faq/upload?format=base64">
+				<input type="file" name="file">
+			</form>
+		</div>
+		<div class="imgs2_list" id="imgs2_list">
+			<!-- <div class="imgs2">
+				<img id="" src="">
+				<span class="close"></span>
+			</div> -->
+		</div>
+	</div>
+	<script>
+/*
+	这是上传的整个过程利用了jquery_form_min.js的 ajaxSubmit方法在 上传的input的file
+	外面添加一个form表单 然后里面写上对应的接口路径进行上传；
+	方便以后来调用
+		--This 2017-2-23
+ */
+$(function(){
+	var HotIssue = {
+	Numners : $('#numners'),							 // 0/4
+	Imgs2List:$("#imgs2_list")							 // 上传完成的整体
+	};
+	/*
+		上传的核心code
+	 */
+	;(function(){
+		// 获取 input=>file的val
+		$("input[name='file']").on("change",function(){
+			var isHtml ='';
+			$("#fotms").ajaxSubmit({
+				dataType:'json',
+				success:function(data){
+					// 限制上传图片的数量
+					var isLength = HotIssue.Imgs2List.find(".imgs2").length;
+					if(isLength > 3){
+						alert("上传的图片超出啦");
+						return false;
+					}else{
+						HotIssue.Numners.text(++isLength+"/4");
+					}
+
+					if(data.compress){
+						isHtml= $('<div class="imgs2"><img id='+data.img+' src='+data.compress+'><span class="close"></span></div>');
+						HotIssue.Imgs2List.append(isHtml);
+					}else{
+						alert("上传失败");
+					}
+				}
+			});
+		})
+		// 动态的绑定删除img
+		$(document).on('click','.close',function(){
+			$(this).parent().remove();
+			HotIssue.isNumber = HotIssue.Imgs2List.find(".imgs2").length;
+			HotIssue.Numners.text(HotIssue.isNumber+"/4");
+		})
+	}());
+});
+	</script>
+</body>
+</html>
